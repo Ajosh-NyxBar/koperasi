@@ -84,7 +84,7 @@ class FinancingController extends Controller
             $request->installment_id,
             (float) $request->amount,
             (float) ($request->penalty_paid ?? 0),
-            $request->method ?? 'cash',
+            $request->input('method', 'cash'),
             $request->notes,
             $request->user()->id,
         );

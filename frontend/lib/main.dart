@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'config/app_theme.dart';
-import 'screens/splash_screen.dart';
+import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,19 +13,5 @@ void main() async {
       statusBarIconBrightness: Brightness.light,
     ),
   );
-  runApp(const KBMTApp());
-}
-
-class KBMTApp extends StatelessWidget {
-  const KBMTApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'KBMT - Koperasi',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const SplashScreen(),
-    );
-  }
+  runApp(const ProviderScope(child: KBMTApp()));
 }
