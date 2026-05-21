@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Channels\FcmChannel;
 use App\Models\Financing;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -12,7 +13,7 @@ class FinancingStatusNotification extends Notification
 
     public function __construct(public Financing $financing, public string $status) {}
 
-    public function via($notifiable): array { return ['database']; }
+    public function via($notifiable): array { return ['database', FcmChannel::class]; }
 
     public function toDatabase($notifiable): array
     {
@@ -35,6 +36,20 @@ class FinancingStatusNotification extends Notification
             'financing_id'    => $this->financing->id,
             'contract_number' => $this->financing->contract_number,
             'status'          => $this->status,
+        ];
+    }
+
+    public function toFcm($notifiable): array
+    {
+        $dbData = $this->toDatabase($notifiable);
+        return [
+            'title' => $dbData['title'],
+            'body'  => $dbData['message'],
+            'data'  => [
+                'type'         => 'financing_status',
+                'financing_id' => (string) $this->financing->id,
+                'status'       => $this->status,
+            ],
         ];
     }
 }

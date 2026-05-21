@@ -42,14 +42,25 @@ class ApiConstants {
   // Notifications
   static const String notifications = '/notifications';
   static const String notificationsReadAll = '/notifications/read-all';
+  static const String deviceTokens = '/device-tokens';
+
+  // Penalties
+  static const String penaltyOverview = '/penalties/overview';
+  static const String penaltySettings = '/penalties/settings';
+  static const String penaltyWaivers = '/penalties/waivers';
+  static String penaltyWaive(int installmentId) => '/penalties/installments/$installmentId/waive';
 
   // Reports
-  static const String reportMembersPdf = '/reports/members/pdf';
-  static const String reportMembersExcel = '/reports/members/excel';
-  static const String reportSavingsPdf = '/reports/savings/pdf';
-  static const String reportSavingsExcel = '/reports/savings/excel';
-  static const String reportFinancingsPdf = '/reports/financings/pdf';
-  static const String reportFinancingsExcel = '/reports/financings/excel';
-  static const String reportSocialFundsPdf = '/reports/social-funds/pdf';
-  static const String reportSocialFundsExcel = '/reports/social-funds/excel';
+  static const String reportMembers = '/reports/members';
+  static const String reportMembersPdf = '/reports/members';
+  static const String reportMembersExcel = '/reports/members';
+  static const String reportSavings = '/reports/savings';
+  static const String reportSavingsPdf = '/reports/savings';
+  static const String reportSavingsExcel = '/reports/savings';
+  static const String reportFinancings = '/reports/financings';
+  static const String reportFinancingsPdf = '/reports/financings';
+  static const String reportFinancingsExcel = '/reports/financings';
+  static const String reportSocialFunds = '/reports/social-funds';
+  static const String reportSocialFundsPdf = '/reports/social-funds';
+  static const String reportSocialFundsExcel = '/reports/social-funds';
 }

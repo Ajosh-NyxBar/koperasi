@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Channels\FcmChannel;
 use App\Models\Installment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -12,7 +13,7 @@ class InstallmentDueNotification extends Notification
 
     public function __construct(public Installment $installment) {}
 
-    public function via($notifiable): array { return ['database']; }
+    public function via($notifiable): array { return ['database', FcmChannel::class]; }
 
     public function toDatabase($notifiable): array
     {
@@ -26,6 +27,20 @@ class InstallmentDueNotification extends Notification
             'amount'             => (float) $this->installment->amount,
             'due_date'           => $this->installment->due_date->toDateString(),
             'is_overdue'         => $this->installment->isOverdue(),
+        ];
+    }
+
+    public function toFcm($notifiable): array
+    {
+        $dbData = $this->toDatabase($notifiable);
+        return [
+            'title' => $dbData['title'],
+            'body'  => $dbData['message'],
+            'data'  => [
+                'type'           => 'installment_due',
+                'financing_id'   => (string) $this->installment->financing_id,
+                'installment_id' => (string) $this->installment->id,
+            ],
         ];
     }
 }

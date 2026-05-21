@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\DeviceTokenController;
 use App\Http\Controllers\Api\FinancingController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\PenaltyController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SavingController;
@@ -46,6 +48,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/read',        [NotificationController::class, 'markAsRead']);
         Route::post('/read-all',         [NotificationController::class, 'markAllAsRead']);
     });
+
+    // ---------- Device Tokens (FCM) ----------
+    Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);
+    Route::delete('/device-tokens', [DeviceTokenController::class, 'destroy']);
 
     // ---------- Member self-service savings ----------
     Route::prefix('savings')->group(function () {
@@ -120,6 +126,17 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/savings',      [ReportController::class, 'savings']);
             Route::get('/financings',   [ReportController::class, 'financings']);
             Route::get('/social-funds', [ReportController::class, 'socialFunds']);
+        });
+
+        // Penalty / Denda Management
+        Route::prefix('penalties')->group(function () {
+            Route::get('/overview',                    [PenaltyController::class, 'overview']);
+            Route::get('/settings',                    [PenaltyController::class, 'settings']);
+            Route::post('/settings',                   [PenaltyController::class, 'storeSetting']);
+            Route::put('/settings/{setting}',          [PenaltyController::class, 'updateSetting']);
+            Route::delete('/settings/{setting}',       [PenaltyController::class, 'deleteSetting']);
+            Route::post('/installments/{installment}/waive', [PenaltyController::class, 'waive']);
+            Route::get('/waivers',                     [PenaltyController::class, 'waiverHistory']);
         });
     });
 });

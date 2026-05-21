@@ -10,7 +10,7 @@ class AdminShell extends StatelessWidget {
     final loc = GoRouterState.of(context).uri.path;
     if (loc.startsWith('/admin/members')) return 1;
     if (loc.startsWith('/admin/products')) return 2;
-    if (loc.startsWith('/admin/savings') || loc.startsWith('/admin/financings')) return 3;
+    if (loc.startsWith('/admin/savings') || loc.startsWith('/admin/financings') || loc.startsWith('/admin/penalties')) return 3;
     if (loc.startsWith('/admin/reports')) return 4;
     return 0;
   }
