@@ -90,7 +90,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text('Dashboard Admin KBMT', style: GoogleFonts.poppins(fontSize: 13, color: Colors.white60)),
+                      Text('Dashboard Admin - Koperasi Konsumen Bina Mutiara Terpadu', style: GoogleFonts.poppins(fontSize: 11, color: Colors.white60)),
                     ],
                   ),
                 ),

@@ -80,15 +80,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_rounded,
-                      size: 64,
                       color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 20, offset: const Offset(0, 10))],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Image.asset('assets/images/logoKBMT.png', fit: BoxFit.contain),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -102,10 +103,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Koperasi Simpan Pinjam',
+                    'Koperasi Konsumen\nBina Mutiara Terpadu',
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white70,
                           letterSpacing: 1,
+                          height: 1.4,
                         ),
                   ),
                 ],

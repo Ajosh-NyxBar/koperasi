@@ -67,7 +67,7 @@ class MemberInfo {
   factory MemberInfo.fromJson(Map<String, dynamic> json) {
     return MemberInfo(
       id: json['id'] ?? 0,
-      memberId: json['member_id'] ?? '',
+      memberId: json['member_code'] ?? json['member_id'] ?? '',
       address: json['address'],
       occupation: json['occupation'],
       joinDate: json['join_date'] != null

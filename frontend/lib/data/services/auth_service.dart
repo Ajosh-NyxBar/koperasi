@@ -19,7 +19,10 @@ class AuthService {
         'email': email,
         'password': password,
       });
-      return UserModel.fromJson(res.data['data']);
+      final data = res.data['data'] as Map<String, dynamic>;
+      final userJson = Map<String, dynamic>.from(data['user'] as Map);
+      userJson['token'] = data['token'];
+      return UserModel.fromJson(userJson);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -28,7 +31,10 @@ class AuthService {
   Future<UserModel> register(Map<String, dynamic> data) async {
     try {
       final res = await _dio.post(ApiConstants.register, data: data);
-      return UserModel.fromJson(res.data['data']);
+      final resData = res.data['data'] as Map<String, dynamic>;
+      final userJson = Map<String, dynamic>.from(resData['user'] as Map);
+      userJson['token'] = resData['token'];
+      return UserModel.fromJson(userJson);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
