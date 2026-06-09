@@ -28,11 +28,11 @@ class ApiConstants {
   static const String principalSaving = '/savings/principal';
 
   // Financing
-  static const String financings = '/financings';
-  static const String financingSimulate = '/financings/simulate';
+  static const String financings = '/financing';
+  static const String financingSimulate = '/financing/simulate';
 
   // Products
-  static const String categories = '/products/categories';
+  static const String categories = '/categories';
   static const String products = '/products';
 
   // Social Fund

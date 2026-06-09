@@ -4,7 +4,6 @@ import '../../core/constants/api_constants.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/network/dio_client.dart';
 import '../models/saving_model.dart';
-import '../models/api_response.dart';
 
 final savingServiceProvider = Provider<SavingService>((ref) {
   return SavingService(ref.read(dioProvider));
@@ -14,30 +13,17 @@ class SavingService {
   final Dio _dio;
   SavingService(this._dio);
 
-  Future<Map<String, dynamic>> getMemberBalance(int memberId) async {
+  Future<Map<String, dynamic>> getMemberBalance() async {
     try {
-      final res = await _dio.get('${ApiConstants.savings}/$memberId/balance');
+      final res = await _dio.get('${ApiConstants.savings}/balance');
       return res.data['data'] as Map<String, dynamic>;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
   }
 
-  Future<PaginatedData<SavingTransaction>> getTransactions(
-    int memberId, {
-    int page = 1,
-    String? type,
-  }) async {
-    try {
-      final res = await _dio.get('${ApiConstants.savings}/$memberId/transactions', queryParameters: {
-        'page': page,
-        if (type != null) 'type': type,
-      });
-      return PaginatedData.fromJson(res.data['data'], SavingTransaction.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDioError(e);
-    }
-  }
+  // TODO: backend belum punya endpoint riwayat transaksi simpanan (GET /savings/transactions).
+  // Method getTransactions dihapus sampai endpoint tersedia.
 
   Future<void> deposit(Map<String, dynamic> data) async {
     try {
@@ -55,9 +41,9 @@ class SavingService {
     }
   }
 
-  Future<List<MandatorySaving>> getMandatorySavings(int memberId) async {
+  Future<List<MandatorySaving>> getMandatorySavings() async {
     try {
-      final res = await _dio.get('${ApiConstants.mandatorySavings}/$memberId');
+      final res = await _dio.get(ApiConstants.mandatorySavings);
       return (res.data['data'] as List)
           .map((e) => MandatorySaving.fromJson(e))
           .toList();
@@ -74,9 +60,9 @@ class SavingService {
     }
   }
 
-  Future<PrincipalSaving?> getPrincipalSaving(int memberId) async {
+  Future<PrincipalSaving?> getPrincipalSaving() async {
     try {
-      final res = await _dio.get('${ApiConstants.principalSaving}/$memberId');
+      final res = await _dio.get(ApiConstants.principalSaving);
       if (res.data['data'] != null) {
         return PrincipalSaving.fromJson(res.data['data']);
       }
