@@ -48,23 +48,23 @@ class FinancingModel {
     return FinancingModel(
       id: json['id'] ?? 0,
       memberId: json['member_id'] ?? 0,
-      memberName: json['member_name'] ?? json['member']?['name'],
-      type: json['type'] ?? '',
-      amount: _d(json['amount']),
+      memberName: json['member']?['full_name'],
+      type: json['item_name'] ?? '',
+      amount: _d(json['total_price']),
       tenor: json['tenor'] ?? 0,
-      interestRate: _d(json['interest_rate']),
-      totalPayment: _d(json['total_payment']),
-      monthlyPayment: _d(json['monthly_payment']),
+      interestRate: _d(json['margin_percentage']),
+      totalPayment: _d(json['total_price']),
+      monthlyPayment: _d(json['monthly_installment']),
       status: json['status'] ?? '',
-      purpose: json['purpose'],
-      rejectionReason: json['rejection_reason'],
-      guaranteeType: json['guarantee_type'],
-      guaranteeDetail: json['guarantee_detail'],
-      approvedAt: json['approved_at'] != null
-          ? DateTime.tryParse(json['approved_at'])
+      purpose: json['notes'],
+      rejectionReason: json['reject_reason'],
+      guaranteeType: null,
+      guaranteeDetail: null,
+      approvedAt: json['approved_date'] != null
+          ? DateTime.tryParse(json['approved_date'])
           : null,
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-      progress: _d(json['progress']),
+      progress: _d(json['progress_percentage']),
       installments: json['installments'] != null
           ? (json['installments'] as List)
               .map((e) => InstallmentModel.fromJson(e))
@@ -116,10 +116,10 @@ class InstallmentModel {
       amount: FinancingModel._d(json['amount']),
       principal: FinancingModel._d(json['principal']),
       interest: FinancingModel._d(json['interest']),
-      penalty: FinancingModel._d(json['penalty']),
+      penalty: FinancingModel._d(json['outstanding_penalty'] ?? json['current_penalty'] ?? json['penalty_amount']),
       status: json['status'] ?? '',
       dueDate: DateTime.tryParse(json['due_date'] ?? '') ?? DateTime.now(),
-      paidAt: json['paid_at'] != null ? DateTime.tryParse(json['paid_at']) : null,
+      paidAt: json['paid_date'] != null ? DateTime.tryParse(json['paid_date']) : null,
       paidAmount: json['paid_amount'] != null ? FinancingModel._d(json['paid_amount']) : null,
     );
   }

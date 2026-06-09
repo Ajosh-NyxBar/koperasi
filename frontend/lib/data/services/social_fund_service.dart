@@ -20,7 +20,8 @@ class SocialFundService {
         'page': page,
         if (memberId != null) 'member_id': memberId,
       });
-      return PaginatedData.fromJson(res.data['data'], SocialFundModel.fromJson);
+      // Backend membungkus: data: { funds: { data:[...], meta }, total_in, total_out, balance }
+      return PaginatedData.fromJson(res.data['data']['funds'], SocialFundModel.fromJson);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }

@@ -37,6 +37,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     setState(() { _isLoading = true; _error = null; });
     try {
       await ref.read(authServiceProvider).resetPassword(
+        widget.email,
         widget.token,
         _passCtrl.text,
         _confirmCtrl.text,

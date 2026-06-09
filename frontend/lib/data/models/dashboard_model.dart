@@ -22,11 +22,13 @@ class AdminDashboard {
   factory AdminDashboard.fromJson(Map<String, dynamic> json) {
     return AdminDashboard(
       totalMembers: json['total_members'] ?? 0,
-      activeMembers: json['active_members'] ?? 0,
+      // Backend hanya mengirim total anggota aktif (Member::active()).
+      activeMembers: json['total_members'] ?? 0,
       totalSavings: _d(json['total_savings']),
-      totalFinancings: _d(json['total_financings']),
-      pendingFinancings: json['pending_financings'] ?? 0,
-      totalSocialFund: _d(json['total_social_fund']),
+      totalFinancings: _d(json['total_financing_amount']),
+      pendingFinancings: json['pending_financing'] ?? 0,
+      totalSocialFund: _d(json['social_fund_balance']),
+      // Backend belum mengirim jumlah pengajuan bantuan pending di dashboard.
       pendingApplications: json['pending_applications'] ?? 0,
       monthlyStats: (json['monthly_stats'] as List?)
               ?.map((e) => MonthlyStat.fromJson(e))
@@ -95,9 +97,9 @@ class MonthlyStat {
 
   factory MonthlyStat.fromJson(Map<String, dynamic> json) {
     return MonthlyStat(
-      month: json['month'] ?? '',
-      savings: AdminDashboard._d(json['savings']),
-      financings: AdminDashboard._d(json['financings']),
+      month: json['label'] ?? json['period'] ?? '',
+      savings: AdminDashboard._d(json['mandatory_savings']),
+      financings: AdminDashboard._d(json['installment_income']),
     );
   }
 }

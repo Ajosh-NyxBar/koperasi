@@ -20,7 +20,8 @@ class MemberService {
         'page': page,
         if (search != null && search.isNotEmpty) 'search': search,
       });
-      return PaginatedData.fromJson(res.data['data'], MemberModel.fromJson);
+      // Backend membungkus: data: { items: { data:[...], meta } }
+      return PaginatedData.fromJson(res.data['data']['items'], MemberModel.fromJson);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }

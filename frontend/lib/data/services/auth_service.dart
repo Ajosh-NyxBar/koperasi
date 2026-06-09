@@ -82,16 +82,17 @@ class AuthService {
         'email': email,
         'otp': otp,
       });
-      return res.data['data']?['reset_token'] ?? '';
+      return res.data['data']?['token'] ?? '';
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
   }
 
-  Future<void> resetPassword(String token, String password, String confirmation) async {
+  Future<void> resetPassword(String email, String token, String password, String confirmation) async {
     try {
       await _dio.post(ApiConstants.resetPassword, data: {
-        'reset_token': token,
+        'email': email,
+        'token': token,
         'password': password,
         'password_confirmation': confirmation,
       });

@@ -3,8 +3,10 @@ class SocialFundModel {
   final int memberId;
   final String? memberName;
   final String type;
+  final String direction; // 'in' (pemasukan) / 'out' (penyaluran)
   final double amount;
   final String? note;
+  final DateTime? transactionDate;
   final DateTime createdAt;
 
   SocialFundModel({
@@ -12,21 +14,27 @@ class SocialFundModel {
     required this.memberId,
     this.memberName,
     required this.type,
+    required this.direction,
     required this.amount,
     this.note,
+    this.transactionDate,
     required this.createdAt,
   });
 
-  bool get isContribution => type == 'contribution';
+  bool get isContribution => direction == 'in';
 
   factory SocialFundModel.fromJson(Map<String, dynamic> json) {
     return SocialFundModel(
       id: json['id'] ?? 0,
       memberId: json['member_id'] ?? 0,
-      memberName: json['member_name'],
+      memberName: json['member']?['full_name'],
       type: json['type'] ?? '',
+      direction: json['direction'] ?? 'in',
       amount: _d(json['amount']),
-      note: json['note'],
+      note: json['description'],
+      transactionDate: json['transaction_date'] != null
+          ? DateTime.tryParse(json['transaction_date'])
+          : null,
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
     );
   }
@@ -89,7 +97,7 @@ class SocialFundApplication {
     return SocialFundApplication(
       id: json['id'] ?? 0,
       memberId: json['member_id'] ?? 0,
-      memberName: json['member_name'],
+      memberName: json['member']?['full_name'],
       type: json['type'],
       reason: json['reason'] ?? '',
       amount: SocialFundModel._d(json['requested_amount'] ?? json['amount']),
@@ -98,8 +106,8 @@ class SocialFundApplication {
       attachmentUrl: json['attachment_url'],
       adminNote: json['admin_notes'] ?? json['admin_note'],
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-      decidedAt: json['decided_at'] != null
-          ? DateTime.tryParse(json['decided_at'])
+      decidedAt: json['decided_date'] != null
+          ? DateTime.tryParse(json['decided_date'])
           : null,
     );
   }
