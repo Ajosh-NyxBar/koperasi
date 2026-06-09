@@ -13,17 +13,20 @@ class SavingService {
   final Dio _dio;
   SavingService(this._dio);
 
-  Future<Map<String, dynamic>> getMemberBalance() async {
+  /// GET /savings/balance -> saldo tabungan + riwayat transaksi (paginated).
+  /// Backend mendukung filter query: type (deposit/withdrawal), from, to (YYYY-MM-DD).
+  Future<SavingBalance> getBalance({String? type, String? from, String? to}) async {
     try {
-      final res = await _dio.get('${ApiConstants.savings}/balance');
-      return res.data['data'] as Map<String, dynamic>;
+      final res = await _dio.get('${ApiConstants.savings}/balance', queryParameters: {
+        if (type != null) 'type': type,
+        if (from != null) 'from': from,
+        if (to != null) 'to': to,
+      });
+      return SavingBalance.fromJson(res.data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
   }
-
-  // TODO: backend belum punya endpoint riwayat transaksi simpanan (GET /savings/transactions).
-  // Method getTransactions dihapus sampai endpoint tersedia.
 
   Future<void> deposit(Map<String, dynamic> data) async {
     try {
@@ -41,11 +44,13 @@ class SavingService {
     }
   }
 
+  /// GET /savings/mandatory -> { total_paid, items: { data: [...] } }
   Future<List<MandatorySaving>> getMandatorySavings() async {
     try {
       final res = await _dio.get(ApiConstants.mandatorySavings);
-      return (res.data['data'] as List)
-          .map((e) => MandatorySaving.fromJson(e))
+      final items = res.data['data']?['items']?['data'] as List? ?? [];
+      return items
+          .map((e) => MandatorySaving.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
