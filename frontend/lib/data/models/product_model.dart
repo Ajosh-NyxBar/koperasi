@@ -55,12 +55,12 @@ class ProductModel {
       description: json['description'],
       categoryId: json['category_id'] ?? 0,
       categoryName: json['category_name'] ?? json['category']?['name'],
-      buyPrice: _d(json['buy_price']),
-      marginPercent: _d(json['margin_percent']),
+      buyPrice: _d(json['base_price']),
+      marginPercent: _d(json['margin_percentage']),
       sellingPrice: _d(json['selling_price']),
       stock: json['stock'] ?? 0,
       imageUrl: json['image_url'],
-      isActive: json['is_active'] ?? true,
+      isActive: json['is_available'] ?? true,
     );
   }
 

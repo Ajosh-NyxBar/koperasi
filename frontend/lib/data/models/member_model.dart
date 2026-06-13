@@ -30,17 +30,17 @@ class MemberModel {
   factory MemberModel.fromJson(Map<String, dynamic> json) {
     return MemberModel(
       id: json['id'] ?? 0,
-      memberId: json['member_id'] ?? '',
-      name: json['name'] ?? json['user']?['name'] ?? '',
-      email: json['email'] ?? json['user']?['email'] ?? '',
-      phone: json['phone'] ?? json['user']?['phone'],
+      memberId: json['member_code'] ?? '',
+      name: json['full_name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'],
       address: json['address'],
       occupation: json['occupation'],
-      photoUrl: json['photo_url'] ?? json['user']?['photo_url'],
+      photoUrl: json['photo_url'],
       joinDate: json['join_date'] != null
           ? DateTime.tryParse(json['join_date'])
           : null,
-      isActive: json['is_active'] ?? true,
+      isActive: (json['status'] ?? 'active') == 'active',
       savingBalance: _toDouble(json['saving_balance']),
       principalSaving: _toDouble(json['principal_saving']),
     );

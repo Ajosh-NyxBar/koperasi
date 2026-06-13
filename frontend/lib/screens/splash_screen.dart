@@ -69,14 +69,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 20, offset: const Offset(0, 10))],
                     ),
-                    child: const Center(
-                      child: Icon(Icons.account_balance, size: 60, color: AppTheme.primaryColor),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: Image.asset('assets/images/logoKBMT.png', fit: BoxFit.contain),
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text('KBMT', style: GoogleFonts.poppins(fontSize: 42, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 4)),
                   const SizedBox(height: 8),
-                  Text('Koperasi Baitul Maal\nwat Tamwil', textAlign: TextAlign.center,
+                  Text('Koperasi Konsumen\nBina Mutiara Terpadu', textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70, fontWeight: FontWeight.w400, height: 1.5)),
                   const SizedBox(height: 40),
                   const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),

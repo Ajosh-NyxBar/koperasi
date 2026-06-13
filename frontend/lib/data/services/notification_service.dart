@@ -13,11 +13,13 @@ class NotificationApiService {
   final Dio _dio;
   NotificationApiService(this._dio);
 
+  /// GET /notifications -> { unread_count, items: { data: [...], meta } }
   Future<List<NotificationModel>> getNotifications() async {
     try {
       final res = await _dio.get(ApiConstants.notifications);
-      return (res.data['data'] as List)
-          .map((e) => NotificationModel.fromJson(e))
+      final items = res.data['data']?['items']?['data'] as List? ?? [];
+      return items
+          .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);

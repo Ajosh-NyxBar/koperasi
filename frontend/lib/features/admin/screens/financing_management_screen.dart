@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/extensions.dart';
 import '../../../core/widgets/app_button.dart';
@@ -72,7 +73,16 @@ class _FinancingManagementScreenState extends ConsumerState<FinancingManagementS
     final state = ref.watch(financingListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Manajemen Pembiayaan')),
+      appBar: AppBar(
+        title: const Text('Manajemen Pembiayaan'),
+        actions: [
+          IconButton(
+            onPressed: () => context.go('/admin/penalties'),
+            icon: const Icon(Icons.money_off_rounded),
+            tooltip: 'Manajemen Denda',
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // Filter chips

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Channels\FcmChannel;
 use App\Models\MandatorySaving;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -12,7 +13,7 @@ class MandatorySavingDueNotification extends Notification
 
     public function __construct(public MandatorySaving $mandatorySaving) {}
 
-    public function via($notifiable): array { return ['database']; }
+    public function via($notifiable): array { return ['database', FcmChannel::class]; }
 
     public function toDatabase($notifiable): array
     {
@@ -24,6 +25,19 @@ class MandatorySavingDueNotification extends Notification
             'amount'    => (float) $this->mandatorySaving->amount,
             'due_date'  => $this->mandatorySaving->due_date->toDateString(),
             'status'    => $this->mandatorySaving->status,
+        ];
+    }
+
+    public function toFcm($notifiable): array
+    {
+        $dbData = $this->toDatabase($notifiable);
+        return [
+            'title' => $dbData['title'],
+            'body'  => $dbData['message'],
+            'data'  => [
+                'type'   => 'mandatory_saving_due',
+                'period' => $this->mandatorySaving->period,
+            ],
         ];
     }
 }

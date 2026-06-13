@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Channels\FcmChannel;
 use App\Models\SocialFundApplication;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -12,7 +13,7 @@ class SocialFundApplicationStatusNotification extends Notification
 
     public function __construct(public SocialFundApplication $application, public string $status) {}
 
-    public function via($notifiable): array { return ['database']; }
+    public function via($notifiable): array { return ['database', FcmChannel::class]; }
 
     public function toDatabase($notifiable): array
     {
@@ -29,6 +30,20 @@ class SocialFundApplicationStatusNotification extends Notification
             'application_id'     => $this->application->id,
             'application_number' => $this->application->application_number,
             'status'             => $this->status,
+        ];
+    }
+
+    public function toFcm($notifiable): array
+    {
+        $dbData = $this->toDatabase($notifiable);
+        return [
+            'title' => $dbData['title'],
+            'body'  => $dbData['message'],
+            'data'  => [
+                'type'           => 'social_fund_status',
+                'application_id' => (string) $this->application->id,
+                'status'         => $this->status,
+            ],
         ];
     }
 }

@@ -60,7 +60,7 @@ class FinancingService {
 
   Future<FinancingModel> approve(int id) async {
     try {
-      final res = await _dio.post('${ApiConstants.financings}/$id/approve');
+      final res = await _dio.put('${ApiConstants.financings}/$id/approve');
       return FinancingModel.fromJson(res.data['data']);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -69,7 +69,7 @@ class FinancingService {
 
   Future<FinancingModel> reject(int id, String reason) async {
     try {
-      final res = await _dio.post('${ApiConstants.financings}/$id/reject', data: {
+      final res = await _dio.put('${ApiConstants.financings}/$id/reject', data: {
         'rejection_reason': reason,
       });
       return FinancingModel.fromJson(res.data['data']);

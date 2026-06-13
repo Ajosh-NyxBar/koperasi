@@ -6,6 +6,6 @@ class AppConfig {
   
   // App info
   static const String appName = 'KBMT';
-  static const String appFullName = 'Koperasi Baitul Maal wat Tamwil';
+  static const String appFullName = 'Koperasi Konsumen Bina Mutiara Terpadu';
   static const String appVersion = '1.0.0';
 }

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\InstallmentResource;
-use App\Http\Resources\MemberResource;
 use App\Models\Financing;
 use App\Models\Installment;
 use App\Models\MandatorySaving;
@@ -59,23 +57,45 @@ class DashboardController extends Controller
         if (!$member) return $this->error('Data anggota tidak ditemukan', 404);
 
         $saving = $member->savingAccount;
-        $activeFinancings = $member->financings()->whereIn('status', ['approved', 'pending'])->with('installments')->get();
-        $totalMandatory = $member->mandatorySavings()->where('status', 'paid')->sum('amount');
+        $principalSaving = $member->principalSaving;
+        $totalFinancing = (float) $member->financings()->where('status', 'approved')->sum('total_price');
+
+        $activeInstallments = Installment::whereHas('financing', fn($q) => $q->where('member_id', $member->id)->where('status', 'approved'))
+            ->whereIn('status', ['pending', 'partial', 'overdue'])
+            ->count();
 
         $nextInstallment = Installment::whereHas('financing', fn($q) => $q->where('member_id', $member->id)->where('status', 'approved'))
             ->whereIn('status', ['pending', 'partial', 'overdue'])
             ->orderBy('due_date')
             ->first();
 
+        $unpaidMandatory = $member->mandatorySavings()->whereIn('status', ['unpaid', 'overdue'])->count();
+
+        // Recent transactions from saving account
+        $recentTransactions = [];
+        if ($saving) {
+            $recentTransactions = $saving->transactions()
+                ->orderByDesc('transaction_date')
+                ->limit(5)
+                ->get()
+                ->map(fn($t) => [
+                    'type'        => $t->type,
+                    'description' => $t->description ?? ($t->type === 'deposit' ? 'Setoran' : 'Penarikan'),
+                    'amount'      => (float) $t->amount,
+                    'date'        => $t->transaction_date?->toDateTimeString() ?? $t->created_at->toDateTimeString(),
+                ]);
+        }
+
         return $this->success([
-            'member'                  => MemberResource::make($member),
             'saving_balance'          => (float) ($saving?->balance ?? 0),
-            'principal_saving'        => $member->principalSaving,
-            'total_mandatory_savings' => (float) $totalMandatory,
-            'last_mandatory_saving'   => $member->mandatorySavings()->latest('period')->first(),
-            'active_financings'       => $activeFinancings,
-            'next_installment'        => $nextInstallment ? InstallmentResource::make($nextInstallment) : null,
+            'principal_saving'        => (float) ($principalSaving?->amount ?? 0),
+            'total_financing'         => $totalFinancing,
+            'active_installments'     => $activeInstallments,
+            'next_installment_amount' => (float) ($nextInstallment?->amount ?? 0),
+            'next_installment_due'    => $nextInstallment?->due_date?->format('Y-m-d'),
+            'unpaid_mandatory'        => $unpaidMandatory,
             'unread_notifications'    => $request->user()->unreadNotifications()->count(),
+            'recent_transactions'     => $recentTransactions,
         ]);
     }
 }

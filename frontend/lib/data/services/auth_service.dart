@@ -19,7 +19,10 @@ class AuthService {
         'email': email,
         'password': password,
       });
-      return UserModel.fromJson(res.data['data']);
+      final data = res.data['data'] as Map<String, dynamic>;
+      final userJson = Map<String, dynamic>.from(data['user'] as Map);
+      userJson['token'] = data['token'];
+      return UserModel.fromJson(userJson);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -28,7 +31,10 @@ class AuthService {
   Future<UserModel> register(Map<String, dynamic> data) async {
     try {
       final res = await _dio.post(ApiConstants.register, data: data);
-      return UserModel.fromJson(res.data['data']);
+      final resData = res.data['data'] as Map<String, dynamic>;
+      final userJson = Map<String, dynamic>.from(resData['user'] as Map);
+      userJson['token'] = resData['token'];
+      return UserModel.fromJson(userJson);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -76,16 +82,17 @@ class AuthService {
         'email': email,
         'otp': otp,
       });
-      return res.data['data']?['reset_token'] ?? '';
+      return res.data['data']?['token'] ?? '';
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
   }
 
-  Future<void> resetPassword(String token, String password, String confirmation) async {
+  Future<void> resetPassword(String email, String token, String password, String confirmation) async {
     try {
       await _dio.post(ApiConstants.resetPassword, data: {
-        'reset_token': token,
+        'email': email,
+        'token': token,
         'password': password,
         'password_confirmation': confirmation,
       });

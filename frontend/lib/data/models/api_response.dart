@@ -51,11 +51,16 @@ class PaginatedData<T> {
             ?.map((e) => fromItem(e as Map<String, dynamic>))
             .toList() ??
         [];
+    // Laravel resource collection menyimpan info paginasi di bawah 'meta';
+    // paginator biasa menaruhnya di level atas. Dukung keduanya.
+    final meta = json['meta'] is Map<String, dynamic>
+        ? json['meta'] as Map<String, dynamic>
+        : json;
     return PaginatedData(
       items: dataList,
-      currentPage: json['current_page'] ?? 1,
-      lastPage: json['last_page'] ?? 1,
-      total: json['total'] ?? 0,
+      currentPage: meta['current_page'] ?? 1,
+      lastPage: meta['last_page'] ?? 1,
+      total: meta['total'] ?? dataList.length,
     );
   }
 }

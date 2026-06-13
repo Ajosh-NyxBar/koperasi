@@ -4,7 +4,6 @@ import '../../core/constants/api_constants.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/network/dio_client.dart';
 import '../models/saving_model.dart';
-import '../models/api_response.dart';
 
 final savingServiceProvider = Provider<SavingService>((ref) {
   return SavingService(ref.read(dioProvider));
@@ -14,26 +13,16 @@ class SavingService {
   final Dio _dio;
   SavingService(this._dio);
 
-  Future<Map<String, dynamic>> getMemberBalance(int memberId) async {
+  /// GET /savings/balance -> saldo tabungan + riwayat transaksi (paginated).
+  /// Backend mendukung filter query: type (deposit/withdrawal), from, to (YYYY-MM-DD).
+  Future<SavingBalance> getBalance({String? type, String? from, String? to}) async {
     try {
-      final res = await _dio.get('${ApiConstants.savings}/$memberId/balance');
-      return res.data['data'] as Map<String, dynamic>;
-    } on DioException catch (e) {
-      throw ApiException.fromDioError(e);
-    }
-  }
-
-  Future<PaginatedData<SavingTransaction>> getTransactions(
-    int memberId, {
-    int page = 1,
-    String? type,
-  }) async {
-    try {
-      final res = await _dio.get('${ApiConstants.savings}/$memberId/transactions', queryParameters: {
-        'page': page,
+      final res = await _dio.get('${ApiConstants.savings}/balance', queryParameters: {
         if (type != null) 'type': type,
+        if (from != null) 'from': from,
+        if (to != null) 'to': to,
       });
-      return PaginatedData.fromJson(res.data['data'], SavingTransaction.fromJson);
+      return SavingBalance.fromJson(res.data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -55,11 +44,13 @@ class SavingService {
     }
   }
 
-  Future<List<MandatorySaving>> getMandatorySavings(int memberId) async {
+  /// GET /savings/mandatory -> { total_paid, items: { data: [...] } }
+  Future<List<MandatorySaving>> getMandatorySavings() async {
     try {
-      final res = await _dio.get('${ApiConstants.mandatorySavings}/$memberId');
-      return (res.data['data'] as List)
-          .map((e) => MandatorySaving.fromJson(e))
+      final res = await _dio.get(ApiConstants.mandatorySavings);
+      final items = res.data['data']?['items']?['data'] as List? ?? [];
+      return items
+          .map((e) => MandatorySaving.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -74,9 +65,9 @@ class SavingService {
     }
   }
 
-  Future<PrincipalSaving?> getPrincipalSaving(int memberId) async {
+  Future<PrincipalSaving?> getPrincipalSaving() async {
     try {
-      final res = await _dio.get('${ApiConstants.principalSaving}/$memberId');
+      final res = await _dio.get(ApiConstants.principalSaving);
       if (res.data['data'] != null) {
         return PrincipalSaving.fromJson(res.data['data']);
       }

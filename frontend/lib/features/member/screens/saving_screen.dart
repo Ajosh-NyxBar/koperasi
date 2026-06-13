@@ -7,9 +7,8 @@ import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/saving_model.dart';
 import '../../../data/services/saving_service.dart';
-import '../../../providers/auth_provider.dart';
 
-final _savingTxProvider = StateProvider<AsyncValue<List<SavingTransaction>>>((ref) => const AsyncValue.loading());
+final _balanceProvider = StateProvider<AsyncValue<SavingBalance>>((ref) => const AsyncValue.loading());
 final _mandatoryProvider = StateProvider<AsyncValue<List<MandatorySaving>>>((ref) => const AsyncValue.loading());
 
 class SavingScreen extends ConsumerStatefulWidget {
@@ -29,19 +28,16 @@ class _SavingScreenState extends ConsumerState<SavingScreen> with SingleTickerPr
     Future.microtask(() => _loadAll());
   }
 
-  int get _memberId => ref.read(authProvider).user?.member?.id ?? 0;
-
   Future<void> _loadAll() async {
     final svc = ref.read(savingServiceProvider);
-    final mid = _memberId;
     try {
-      final txs = await svc.getTransactions(mid);
-      ref.read(_savingTxProvider.notifier).state = AsyncValue.data(txs.items);
+      final balance = await svc.getBalance();
+      ref.read(_balanceProvider.notifier).state = AsyncValue.data(balance);
     } catch (e, st) {
-      ref.read(_savingTxProvider.notifier).state = AsyncValue.error(e, st);
+      ref.read(_balanceProvider.notifier).state = AsyncValue.error(e, st);
     }
     try {
-      final ms = await svc.getMandatorySavings(mid);
+      final ms = await svc.getMandatorySavings();
       ref.read(_mandatoryProvider.notifier).state = AsyncValue.data(ms);
     } catch (e, st) {
       ref.read(_mandatoryProvider.notifier).state = AsyncValue.error(e, st);
@@ -66,11 +62,60 @@ class _SavingScreenState extends ConsumerState<SavingScreen> with SingleTickerPr
           labelColor: AppColors.primary,
         ),
       ),
-      body: TabBarView(
-        controller: _tabCtrl,
+      body: Column(
         children: [
-          _TransactionTab(onRefresh: _loadAll),
-          _MandatoryTab(onRefresh: _loadAll),
+          const _BalanceHeader(),
+          Expanded(
+            child: TabBarView(
+              controller: _tabCtrl,
+              children: [
+                _TransactionTab(onRefresh: _loadAll),
+                _MandatoryTab(onRefresh: _loadAll),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BalanceHeader extends ConsumerWidget {
+  const _BalanceHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(_balanceProvider);
+    final balance = state.maybeWhen(data: (b) => b.balance, orElse: () => null);
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Icon(Icons.account_balance_wallet_rounded, color: Colors.white70, size: 18),
+              SizedBox(width: 8),
+              Text('Saldo Tabungan', style: TextStyle(color: Colors.white70, fontSize: 13)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          balance == null
+              ? const ShimmerLoading(height: 28, width: 120)
+              : Text(
+                  balance.currency,
+                  style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700),
+                ),
         ],
       ),
     );
@@ -83,14 +128,22 @@ class _TransactionTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(_savingTxProvider);
+    final state = ref.watch(_balanceProvider);
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: state.when(
         loading: () => const ShimmerList(),
-        error: (e, _) => Center(child: Text('$e')),
-        data: (txs) {
-          if (txs.isEmpty) return const EmptyState(icon: Icons.savings_outlined, title: 'Belum ada transaksi');
+        error: (e, _) => _ErrorView(message: '$e', onRetry: onRefresh),
+        data: (balance) {
+          final txs = balance.transactions.items;
+          if (txs.isEmpty) {
+            return ListView(
+              children: const [
+                SizedBox(height: 80),
+                EmptyState(icon: Icons.savings_outlined, title: 'Belum ada transaksi'),
+              ],
+            );
+          }
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: txs.length,
@@ -123,9 +176,10 @@ class _TransactionTab extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tx.type == 'deposit' ? 'Setoran' : 'Penarikan', style: const TextStyle(fontWeight: FontWeight.w600)),
-                          if (tx.note != null) Text(tx.note!, style: TextStyle(color: AppColors.onSurfaceVariant, fontSize: 12)),
-                          Text(tx.createdAt.withTime, style: TextStyle(color: AppColors.onSurfaceVariant, fontSize: 11)),
+                          Text(tx.typeLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          if (tx.note != null && tx.note!.isNotEmpty)
+                            Text(tx.note!, style: TextStyle(color: AppColors.onSurfaceVariant, fontSize: 12)),
+                          Text(tx.transactionDate.formatted, style: TextStyle(color: AppColors.onSurfaceVariant, fontSize: 11)),
                         ],
                       ),
                     ),
@@ -164,9 +218,16 @@ class _MandatoryTab extends ConsumerWidget {
       onRefresh: onRefresh,
       child: state.when(
         loading: () => const ShimmerList(),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => _ErrorView(message: '$e', onRetry: onRefresh),
         data: (items) {
-          if (items.isEmpty) return const EmptyState(icon: Icons.calendar_month, title: 'Belum ada simpanan wajib');
+          if (items.isEmpty) {
+            return ListView(
+              children: const [
+                SizedBox(height: 80),
+                EmptyState(icon: Icons.calendar_month, title: 'Belum ada simpanan wajib'),
+              ],
+            );
+          }
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: items.length,
@@ -192,7 +253,7 @@ class _MandatoryTab extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    StatusBadge.fromStatus(ms.isPaid ? 'paid' : 'pending'),
+                    StatusBadge.fromStatus(ms.status),
                   ],
                 ),
               );
@@ -200,6 +261,39 @@ class _MandatoryTab extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final Future<void> Function() onRetry;
+  const _ErrorView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        const SizedBox(height: 80),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                const Icon(Icons.error_outline, color: AppColors.error, size: 40),
+                const SizedBox(height: 12),
+                Text(message, textAlign: TextAlign.center, style: TextStyle(color: AppColors.onSurfaceVariant)),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Coba lagi'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

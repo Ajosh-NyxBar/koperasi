@@ -23,17 +23,17 @@ class UserModel {
   bool get isMember => role == 'member';
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final memberJson = json['member'] as Map<String, dynamic>?;
     return UserModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       email: json['email'] ?? '',
-      phone: json['phone'],
+      // Backend menaruh phone & photo_url di dalam objek member.
+      phone: json['phone'] ?? memberJson?['phone'],
       role: json['role'] ?? 'member',
-      photoUrl: json['photo_url'],
+      photoUrl: json['photo_url'] ?? memberJson?['photo_url'],
       token: json['token'],
-      member: json['member'] != null
-          ? MemberInfo.fromJson(json['member'])
-          : null,
+      member: memberJson != null ? MemberInfo.fromJson(memberJson) : null,
     );
   }
 
@@ -67,7 +67,7 @@ class MemberInfo {
   factory MemberInfo.fromJson(Map<String, dynamic> json) {
     return MemberInfo(
       id: json['id'] ?? 0,
-      memberId: json['member_id'] ?? '',
+      memberId: json['member_code'] ?? json['member_id'] ?? '',
       address: json['address'],
       occupation: json['occupation'],
       joinDate: json['join_date'] != null

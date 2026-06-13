@@ -55,12 +55,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 const SizedBox(height: 40),
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  width: 72,
+                  height: 72,
                   decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, 4))],
                   ),
-                  child: const Icon(Icons.account_balance_rounded, size: 32, color: Colors.white),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset('assets/images/logoKBMT.png', fit: BoxFit.contain),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Text(

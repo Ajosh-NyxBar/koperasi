@@ -4,6 +4,7 @@ import '../core/network/api_exception.dart';
 import '../core/storage/secure_storage.dart';
 import '../data/models/user_model.dart';
 import '../data/services/auth_service.dart';
+import '../data/services/push_notification_service.dart';
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(ref);
@@ -51,6 +52,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       try {
         final user = await _service.getProfile();
         state = AuthState(user: user, isAuthenticated: true);
+        // Initialize push notifications after auth check
+        _initPushNotifications();
       } catch (_) {
         await _storage.clearAll();
         state = const AuthState();
@@ -67,6 +70,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _storage.saveUser(user.toJson());
       }
       state = AuthState(user: user, isAuthenticated: true);
+      // Initialize push notifications after login
+      _initPushNotifications();
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(isLoading: false, error: e.firstError);
@@ -98,10 +103,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     try {
+      // Remove FCM token before logout
+      await _ref.read(pushNotificationServiceProvider).removeToken();
       await _service.logout();
     } catch (_) {}
     await _storage.clearAll();
     state = const AuthState();
+  }
+
+  void _initPushNotifications() {
+    try {
+      _ref.read(pushNotificationServiceProvider).initialize();
+    } catch (_) {
+      // Push notification initialization is non-critical
+    }
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {

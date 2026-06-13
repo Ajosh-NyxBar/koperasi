@@ -7,6 +7,7 @@ import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/member/screens/member_shell.dart';
+import '../../features/member/screens/product_catalog_screen.dart';
 import '../../features/member/screens/member_dashboard_screen.dart';
 import '../../features/member/screens/saving_screen.dart';
 import '../../features/member/screens/financing_screen.dart';
@@ -23,6 +24,7 @@ import '../../features/admin/screens/member_form_screen.dart';
 import '../../features/admin/screens/product_management_screen.dart';
 import '../../features/admin/screens/saving_management_screen.dart';
 import '../../features/admin/screens/financing_management_screen.dart';
+import '../../features/admin/screens/penalty_management_screen.dart';
 import '../../features/admin/screens/report_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -47,6 +49,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __, child) => MemberShell(child: child),
         routes: [
           GoRoute(path: '/member', builder: (_, __) => const MemberDashboardScreen()),
+          GoRoute(path: '/member/products', builder: (_, __) => const ProductCatalogScreen()),
           GoRoute(path: '/member/savings', builder: (_, __) => const SavingScreen()),
           GoRoute(path: '/member/financings', builder: (_, __) => const FinancingScreen()),
           GoRoute(path: '/member/profile', builder: (_, __) => const ProfileScreen()),
@@ -72,6 +75,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/products', builder: (_, __) => const ProductManagementScreen()),
           GoRoute(path: '/admin/savings', builder: (_, __) => const AdminSavingManagementScreen()),
           GoRoute(path: '/admin/financings', builder: (_, __) => const FinancingManagementScreen()),
+          GoRoute(path: '/admin/penalties', builder: (_, __) => const PenaltyManagementScreen()),
           GoRoute(path: '/admin/reports', builder: (_, __) => const ReportScreen()),
         ],
       ),
